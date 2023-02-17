@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ConsoleTables;
+using Spectre.Console;
 
-class Book
+public class Book
 {
     // Properties
+    public string Type { get; set; }
     public string Title { get; set; }
     public string Author { get; set; }
     public string Pages { get; set; }
@@ -26,101 +29,136 @@ class Book
     }
 }
 
-class Program
+namespace Library
 {
-    // --------------------------------------------------------------------------------------------------------------
-    // Main method
-    // --------------------------------------------------------------------------------------------------------------
-    public static void Main()
+    internal class Program
     {
-        // Create a new instance of the Librarian class
-        Librarian libr = new Librarian();
-
-        bool running = true;
-
-        while (running)
+        // --------------------------------------------------------------------------------------------------------------
+        // Main method
+        // --------------------------------------------------------------------------------------------------------------
+        static void Main()
         {
-            // Prompt user for menu option
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine("\n\tEnter a menu option\n");
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("\t1. Add a book to the library");
-            Console.WriteLine("\t2. List books in the library");
-            Console.WriteLine("\t3. Search for a book in the library");
-            Console.WriteLine("\t4. Exit");
+            // Create a new instance of the Librarian class
+            Librarian libr = new Librarian();
 
-            // Read the user input
-            if(Int32.TryParse(Console.ReadLine(), out int result))
+            bool running = true;
+
+            while (running)
             {
-                switch (result)
+                // Prompt user for menu option
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine("\n * * * * * * * * * * * * * * * * *"
+                    +             "\n *      Enter a menu option      *"
+                    +             "\n * * * * * * * * * * * * * * * * *\n");
+
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("  1. Add to the library");
+                Console.WriteLine("  2. List items in the library");
+                Console.WriteLine("  3. Search the library");
+                Console.WriteLine("  4. Exit");
+
+                // Read the user input
+                if(Int32.TryParse(Console.ReadLine(), out int result))
                 {
-                    case 1:
-                        // Clear the console
-                        Console.Clear();
+                    switch (result)
+                    {
+                        case 1:
+                            // Clear the Console
+                            Console.Clear();
 
-                        // Ask the user to enter a book
-                        Console.ForegroundColor = ConsoleColor.Blue;
-                        Console.WriteLine("Enter a book to add to the library");
+                            var bookType = AnsiConsole.Prompt(
+                                new SelectionPrompt<string>()
+                                    .Title("Add to the library")
+                                    .PageSize(10)
+                                    .AddChoices(new[] {"Novel", "Short Story", "Magazine"})
+                                );
 
-                        // Read the user input
-                        Console.ForegroundColor = ConsoleColor.Blue;
-                        Console.WriteLine("Enter the title of the book:");
-                        Console.ForegroundColor = ConsoleColor.White;
-                        string title = Console.ReadLine();
-                        
-                        Console.ForegroundColor = ConsoleColor.Blue;
-                        Console.WriteLine("Enter the author of the book:");
-                        Console.ForegroundColor = ConsoleColor.White;
-                        string author= Console.ReadLine();
+                            switch (bookType)
+                            {
+                                case "Novel":
+                                    // Add Novel 
+                                    Novel novel = new Novel(GetTitle(), GetAuthor(), GetPages());
+                                    libr.NewBook(novel);
 
-                        Console.ForegroundColor = ConsoleColor.Blue;
-                        Console.WriteLine("Enter the number of pages in the book:");
-                        Console.ForegroundColor = ConsoleColor.White;
-                        string pages = Console.ReadLine();
+                                    break;
+                                case "Short Story":
+                                    // Add Short 
+                                    Short shorty = new Short(GetTitle(), GetAuthor(), GetPages());
+                                    libr.NewBook(shorty);
 
-                        // Create a new instance of the Book class
-                        Book book = new Book(title, author, pages);
+                                    break;
+                                case "Magazine":
+                                    // Add Magazine
+                                    Magazine magazine = new Magazine(GetTitle(), GetAuthor(), GetPages());
+                                    libr.NewBook(magazine);
 
-                        // Call the NewBook method
-                        libr.NewBook(book);
+                                    break;
+                            }
+                            break;
 
-                        break;
+                        case 2:
+                            // Clear the console
+                            Console.Clear();
 
-                    case 2:
-                        // Clear the console
-                        Console.Clear();
+                            // Call the ListBooks method
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            libr.ListBooks();
+                            Console.ResetColor();
 
-                        // Call the ListBooks method
-                        libr.ListBooks();
+                            break;
 
-                        break;
+                        case 3:
+                            // Clear the Console
+                            Console.Clear();
 
-                    case 3:
-                        // Clear the Console
-                        Console.Clear();
+                            // Call the SearchBook Method
+                            Console.WriteLine("Search for a title in the library");
+                            
+                            Console.ForegroundColor = ConsoleColor.Blue;
+                            string search = Console.ReadLine(); 
 
-                        // Call the SearchBook Method
-                        Console.ForegroundColor = ConsoleColor.Blue;
-                        Console.WriteLine("Enter a book to search for in the library");
-                        string search = Console.ReadLine();
+                            libr.SearchBook(search);
 
-                        libr.SearchBook(search);
+                            break;
 
-                        break;
+                        case 4:
+                            running = false;
 
-                    case 4:
-                        running = false;
-
-                        break;
+                            break;
+                    }
                 }
             }
+        }
+
+        public static string GetTitle()
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("Enter the title of the book:");
+            Console.ForegroundColor = ConsoleColor.Blue;
+            return Console.ReadLine();
+        }
+
+        public static string GetAuthor()
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("Enter the author of the book:");
+            Console.ForegroundColor = ConsoleColor.Blue;
+            return Console.ReadLine();
+        }
+
+        public static string GetPages()
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("Enter the number of pages in the book:");
+            Console.ForegroundColor = ConsoleColor.Blue;
+            return Console.ReadLine();
         }
     }
 
     // --------------------------------------------------------------------------------------------------------------
     // Librarian class
     // --------------------------------------------------------------------------------------------------------------
-    private class Librarian
+    public class Librarian
     {
         // Create a list of books
         private List<Book> BookList = new List<Book>();
@@ -150,7 +188,7 @@ class Program
     // --------------------------------------------------------------------------------------------------------------
     // Library class
     // --------------------------------------------------------------------------------------------------------------
-    private class Library
+    public class Library
     {
         // Method to add a new book to the library
         public void AddBook(List<Book> BookList, Book book)
@@ -160,21 +198,24 @@ class Program
             // Clear the console
             Console.Clear();
 
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("Added " + book + " to the library");
+            Console.WriteLine("Added to the library:");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            foreach (var each in book.ToString().Split(", "))
+            {
+                Console.WriteLine(each);
+            }
         }
 
         // Method to list books in the library
         public void ListBooks(List<Book> BookList)
         {
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("Listed books in the library");
-
+            // Create a table, add the books to it and write it to the console
+            var table = new ConsoleTable("Title", "Author", "Pages", "Type");
             foreach (Book book in BookList)
             {
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine(book.ToString());
+                table.AddRow(book.Title, book.Author, book.Pages, book.Type);
             }
+            table.Write(Format.Minimal);
         }
 
         // Method to search for a book in the Library
@@ -184,10 +225,84 @@ class Program
             {
                 if (book.Title == title)
                 {
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine(book.ToString());
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    foreach (var each in book.ToString().Split(", "))
+                    {
+                        Console.WriteLine(each);
+                    }
                 }
             }
         }
     }
+
+    // --------------------------------------------------------------------------------------------------------------
+    // Magazine class
+    // --------------------------------------------------------------------------------------------------------------
+    public class Magazine : Book
+    {
+        // Constructor
+        public Magazine(string title, string author, string pages) : base(title, author, pages)
+        {
+            Type = "Magazine";
+        }
+
+        // Method to return a string
+        public override string ToString()
+        {
+            return "Title: " + Title + ", Author: " + Author + ", Pages: " + Pages + ", Type: " + Type;
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------------------------
+    // Short class
+    // --------------------------------------------------------------------------------------------------------------
+    public class Short : Book 
+    {
+        // Constructor
+        public Short(string title, string author, string pages) : base(title, author, pages)
+        {
+            Type = "Short";
+        }
+
+        // Method to return a string
+        public override string ToString()
+        {
+            return "Title: " + Title + ", Author: " + Author + ", Pages: " + Pages + ", Type: " + Type;
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------------------------
+    // Novel class
+    // --------------------------------------------------------------------------------------------------------------
+    public class Novel : Book
+    {
+        // Constructor
+        public Novel(string title, string author, string pages) : base(title, author, pages)
+        {
+            Type = "Novel";
+        }
+
+        // Method to return a string
+        public override string ToString()
+        {
+            return "Title: " + Title + ", Author: " + Author + ", Pages: " + Pages + ", Type: " + Type;
+        }
+    }
+
+    // public class IntegrationTests
+    // {
+    //     [fact]
+    //     public void AddBook()
+    //     {
+    //         // Arrange
+    //         var book = new Book("The Hobbit", "J.R.R. Tolkien", "310");
+    //         var librarian = new Librarian();
+
+    //         // Act
+    //         librarian.NewBook(book);
+
+    //         // Assert
+    //         Assert.Equal(1, librarian.BookList.Count);
+    //     }
+    // }
 }
